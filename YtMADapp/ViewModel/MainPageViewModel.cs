@@ -59,26 +59,5 @@ namespace YtMADapp.ViewModel
                     {"Video", video}
                 });
         }
-        [RelayCommand]
-        async Task DownloadVideoAsync(string url)
-        {
-            if (IsBusy)
-                return;
-            try
-            {
-                IsBusy = true;
-                var path = await FolderPicker.PickAsync(default);
-                var videos = await youtubeService.VideoDownload(url,"mp4",path.Folder.Path,720,null);
-            }
-            catch (Exception ex)
-            {
-                Debug.Write(ex);
-                await Shell.Current.DisplayAlert("Error", $"Unable to get list:{ex.Message}", "OK");
-            }
-            finally
-            {
-                IsBusy = false;
-            }
-        }
     }
 }

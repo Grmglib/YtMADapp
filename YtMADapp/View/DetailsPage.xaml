@@ -6,10 +6,14 @@
              x:DataType="viewModel:DetailsPageViewModel"
              xmlns:model="clr-namespace:YtMADapp.Model"
              Title="{Binding Video.Title}"
+             BackgroundImageSource="{Binding Video.Thumbnail}"
              x:Name="Details">
     <Grid
       ColumnSpacing="5"
       RowSpacing="0">
+        <Grid.Background>
+            <SolidColorBrush Color="#99000000"/>
+        </Grid.Background>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
@@ -17,32 +21,47 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <CollectionView 
-                    Grid.ColumnSpan="5"
-                    Grid.RowSpan="1"
-                Grid.Row="1"
-                    ItemsSource="{Binding Streams}"
-                    SelectionMode="None">
-            <CollectionView.ItemTemplate>
-                <DataTemplate x:DataType="model:StreamDTO">
-                    <Grid Padding="10">
-                        <Frame HeightRequest="125" Style="{StaticResource CardView}">
-                            <Grid Padding="10" ColumnSpacing="0" ColumnDefinitions="*,*,*,*,*" RowDefinitions="*,*" BackgroundColor="Gray">
-                                <Label Text="Título:" Grid.Column="0" Grid.Row="0" WidthRequest="150" HorizontalOptions="Start"/>
-                                <Label Text="Autor:" Grid.Column="1" Grid.Row="0" WidthRequest="150" HorizontalOptions="Start"/>
-                                <Label Text="Url:" Grid.Column="2" Grid.Row="0" WidthRequest="150" HorizontalOptions="Start"/>
-                                <Label Text="Qualidades:" Grid.Column="3" Grid.Row="0" WidthRequest="150" HorizontalOptions="Start"/>
-                                <Label Text="{Binding Resolution}" Grid.Column="0" Grid.Row="1" WidthRequest="150" HorizontalOptions="Start"/>
-                                <Label Text="{Binding Type}" Grid.Column="1" Grid.Row="1" WidthRequest="150" HorizontalOptions="Start"/>
-                                <Label Text="{Binding Url}" Grid.Column="2" Grid.Row="1" WidthRequest="150" HorizontalOptions="Start"/>
-                                <Button Text="Download" Grid.Column="3" Grid.Row="1" Command="{Binding BindingContext.DownloadVideoCommand, Source={x:Reference Details}}" CommandParameter="{Binding .}"/>
+        <Grid Padding="10" ColumnSpacing="10" ColumnDefinitions="*,*,*,*,*" RowDefinitions="*,*" BackgroundColor="Transparent">
 
-                            </Grid>
-                        </Frame>
-                    </Grid>
-                </DataTemplate>
-            </CollectionView.ItemTemplate>
-        </CollectionView>
+            <Label Text="Audio:" Grid.Column="0" Grid.Row="0" WidthRequest="150" HorizontalOptions="Start" />
+            <Label Text="Video:" Grid.Column="1" Grid.Row="0" WidthRequest="150" HorizontalOptions="Start"/>
+            <Label Text="Mixed:" Grid.Column="2" Grid.Row="0" WidthRequest="150" HorizontalOptions="Start"/>
+            <CollectionView ItemsSource="{Binding Audios}" Grid.Column="0" Grid.Row="1">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="model:StreamDTO">
+                        <VerticalStackLayout>
+                            <Button Text="{Binding Bitrate}" Grid.Column="0" Grid.Row="1" Grid.RowSpan="1" BackgroundColor="#99808080" Command="{Binding BindingContext.DownloadVideoCommand, Source={x:Reference Details}}" CommandParameter="{Binding .}"/>
+                        </VerticalStackLayout>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+            <CollectionView ItemsSource="{Binding Videos}" Grid.Column="1" Grid.Row="1">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="model:StreamDTO">
+                        <VerticalStackLayout>
+                            <Button Text="{Binding Resolution}" Grid.Column="2" Grid.Row="1" Grid.RowSpan="1" BackgroundColor="#99808080" Command="{Binding BindingContext.DownloadVideoCommand, Source={x:Reference Details}}" CommandParameter="{Binding .}">
+                            </Button>
+                        </VerticalStackLayout>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+            <CollectionView ItemsSource="{Binding Mixed}" Grid.Column="2" Grid.Row="1">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="model:StreamDTO">
+                        <VerticalStackLayout>
+                            <Button Text="{Binding Resolution}" Grid.Column="2" Grid.Row="1" Grid.RowSpan="1" BackgroundColor="#99808080" Command="{Binding BindingContext.DownloadVideoCommand, Source={x:Reference Details}}" CommandParameter="{Binding .}"/>
+                        </VerticalStackLayout>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+
+
+
+        </Grid>
+        <!--<ProgressBar x:Name="progressBar" IsVisible="{Binding IsBusy}" Grid.Row="1" ProgressColor="Red" Progress="{Binding Progress}" PropertyChanging="progressBar_PropertyChanging" PropertyChanged="progressBar_PropertyChanged"  WidthRequest="300" ScaleY="7">
+
+        </ProgressBar>-->
         <ActivityIndicator IsVisible="{Binding IsBusy}"
                        IsRunning="{Binding IsBusy}"
                        HorizontalOptions="FillAndExpand"

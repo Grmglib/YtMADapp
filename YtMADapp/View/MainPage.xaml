@@ -22,27 +22,29 @@
                     Grid.RowSpan="1"
                 Grid.Row="1"
                     ItemsSource="{Binding Videos}"
-                    SelectionMode="None">
-                <CollectionView.ItemTemplate>
+                    SelectionMode="Single">
+                <CollectionView.ItemTemplate> 
                     <DataTemplate x:DataType="model:VideoDTO">
-                        <Grid Padding="10">
+                        <Grid Padding="10" x:Name="teste">
                             <Frame HeightRequest="125" Style="{StaticResource CardView}">
-                            <Grid Padding="10" ColumnSpacing="0" ColumnDefinitions="*,*,*,*,*" RowDefinitions="*,*" BackgroundColor="Gray">
-                                <Label Text="Título:" Grid.Column="0" Grid.Row="0" WidthRequest="150" HorizontalOptions="Start"/>
-                                <Label Text="Autor:" Grid.Column="1" Grid.Row="0" WidthRequest="150" HorizontalOptions="Start"/>
-                                <Label Text="Url:" Grid.Column="2" Grid.Row="0" WidthRequest="150" HorizontalOptions="Start"/>
-                                <Label Text="Qualidades:" Grid.Column="3" Grid.Row="0" WidthRequest="150" HorizontalOptions="Start"/>
-                                <Label Text="{Binding Title}" Grid.Column="0" Grid.Row="1" WidthRequest="150" HorizontalOptions="Start"/>
-                                <Label Text="{Binding Author}" Grid.Column="1" Grid.Row="1" WidthRequest="150" HorizontalOptions="Start"/>
-                                <Label Text="{Binding Url}" Grid.Column="2" Grid.Row="1" WidthRequest="200" HorizontalOptions="Start"/>
-                                <Button Text="Download" Grid.Column="3" Grid.Row="1" Command="{Binding BindingContext.GoToDetailsCommand, Source={x:Reference Page}}" CommandParameter="{Binding .}"/>
+                            <Frame.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding BindingContext.GoToDetailsCommand, Source={x:Reference Page}}" CommandParameter="{Binding .}"/>
+                            </Frame.GestureRecognizers>
+                            <Grid Padding="5" ColumnSpacing="0" ColumnDefinitions="*,*,*,*" RowDefinitions="*,*" BackgroundColor="#36454F">
+                                <Image Source="{Binding Thumbnail}" Aspect="AspectFit"  Grid.Column="0" Grid.Row="0" Grid.RowSpan="2" HorizontalOptions="Start"/>
+                                <Label Text="Título:" Grid.Column="1" Grid.Row="0" WidthRequest="150" HorizontalOptions="Start"/>
+                                <Label Text="Autor:" Grid.Column="2" Grid.Row="0" WidthRequest="150" HorizontalOptions="Start"/>
+                                <Label Text="Url:" Grid.Column="3" Grid.Row="0" WidthRequest="150" HorizontalOptions="Start"/>
+                                <Label Text="{Binding Title}" Grid.Column="1" Grid.Row="1" WidthRequest="150" HorizontalOptions="Start"/>
+                                <Label Text="{Binding Author}" Grid.Column="2" Grid.Row="1" WidthRequest="150" HorizontalOptions="Start"/>
+                                <Label Text="{Binding Url}" Grid.Column="3" Grid.Row="1" WidthRequest="200" HorizontalOptions="Start"/>
                             </Grid>
                             </Frame>
                         </Grid>
                     </DataTemplate>
                 </CollectionView.ItemTemplate>
             </CollectionView>
-            <SearchBar Grid.Row="0" Background="Blue" Grid.Column="3" Margin="8" x:Name="Pesquisa" Text="{Binding Pesquisa}" SearchCommand="{Binding SearchVideoCommand}"></SearchBar>
+        <SearchBar Grid.Row="0" Background="#36454F" Grid.Column="3" Margin="8" x:Name="Pesquisa" Text="{Binding Pesquisa}" SearchCommand="{Binding SearchVideoCommand}" Placeholder="Título ou Url do vídeo"></SearchBar>
             <ActivityIndicator IsVisible="{Binding IsBusy}"
                        IsRunning="{Binding IsBusy}"
                        HorizontalOptions="FillAndExpand"

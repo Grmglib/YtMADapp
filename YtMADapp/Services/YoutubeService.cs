@@ -132,7 +132,11 @@ namespace YtMADapp.Services
                         Bitrate = stream.Bitrate.ToString(),
                         Url = stream.Url
                     };
-                    streamList.Add(streamDto);
+                    if(streamDto.Container != "webm")
+                    {
+                        streamList.Add(streamDto);
+                    }
+                    
                 }
                 foreach (var stream in mixedStreams)
                 {
@@ -168,7 +172,7 @@ namespace YtMADapp.Services
         }
         #endregion
         #region Video Download
-        public async Task<string> VideoDownload(string url, string container, string filePath, double? resolution, string? bitrate)
+        public async Task<string> VideoDownload(string url, string container, string filePath, double? resolution, string? bitrate, Progress<double> progress)
         {
             var youtube = new YoutubeClient();
             try
@@ -179,7 +183,7 @@ namespace YtMADapp.Services
                 if (resolution != null)
                 {
                     var streamInfo = streamManifest.GetVideoStreams().Where(s => s.Container.Name == container).Where(s => s.VideoResolution.Height == resolution).First();
-                    await youtube.Videos.Streams.DownloadAsync(streamInfo, $"{filePath}/{fileName}.{streamInfo.Container}");
+                    await youtube.Videos.Streams.DownloadAsync(streamInfo, $"{filePath}/{fileName}.{streamInfo.Container}", progress);
                     return "Video Downloaded";
                 }
                 else if (bitrate != null)
