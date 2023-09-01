@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -43,32 +44,74 @@ public partial class DetailsPageViewModel:BaseViewModel
             return;
         try
         {
-            IsBusy = true;
-            var videoDto = await youtubeService.VideoInfo(Video.Url);
-            var streams = videoDto.Quality;
-            if (streams.Count != 0)
+            if (Video.IsPlaylist)
             {
-                Audios.Clear();
-                Videos.Clear();
-                Mixed.Clear();
-                Streams.Clear();
-            }
-            foreach (var stream in streams)
-            {
-                Streams.Add(stream);
-                switch(stream.Type)
+                IsBusy = true;
+                var videos = await youtubeService.PlaylistInfo(Video.Url,10);
+                List<StreamDTO> Qualities = new List<StreamDTO>();
+                foreach (var video in videos)
                 {
-                    case "Audio":
-                        Audios.Add(stream);
-                        break;
-                    case "Video":
-                        Videos.Add(stream);
-                        break;
-                    case "Mixed":
-                        Mixed.Add(stream);
-                        break;
+
+                    if(video.Quality.Count > Qualities.Count)
+                    {
+                        Qualities.Clear();
+                        Qualities.AddRange(video.Quality);
+                    }
+                    
+                }
+                if (Qualities.Count != 0)
+                {
+                    Audios.Clear();
+                    Videos.Clear();
+                    Mixed.Clear();
+                    Streams.Clear();
+                }
+                foreach (var stream in Qualities)
+                {
+                    switch (stream.Type)
+                    {
+                        case "Audio":
+                            Audios.Add(stream);
+                            break;
+                        case "Video":
+                            Videos.Add(stream);
+                            break;
+                        case "Mixed":
+                            Mixed.Add(stream);
+                            break;
+                    }
                 }
             }
+            else
+            {
+                IsBusy = true;
+                var videoDto = await youtubeService.VideoInfo(Video.Url);
+                var streams = videoDto.Quality;
+                if (streams.Count != 0)
+                {
+                    Audios.Clear();
+                    Videos.Clear();
+                    Mixed.Clear();
+                    Streams.Clear();
+                }
+                foreach (var stream in streams)
+                {
+                    Streams.Add(stream);
+                    switch (stream.Type)
+                    {
+                        case "Audio":
+                            Audios.Add(stream);
+                            break;
+                        case "Video":
+                            Videos.Add(stream);
+                            break;
+                        case "Mixed":
+                            Mixed.Add(stream);
+                            break;
+                    }
+                }
+            }
+            
 
         }
         catch (Exception ex)
@@ -91,12 +134,24 @@ public partial class DetailsPageViewModel:BaseViewModel
             return;
         try
         {
-            IsBusy = true;
-            Progress = 0;
-            var path = await FolderPicker.PickAsync(default);
-            var videos = await youtubeService.VideoDownload(Video.Url, stream.Container, path.Folder.Path, stream.Resolution, stream.Bitrate, progressHandler);
-            var toast = Toast.Make("Track Downloaded", CommunityToolkit.Maui.Core.ToastDuration.Short, 30);
-            toast.Show();
+            if(Video.IsPlaylist)
+            {
+                IsBusy = true;
+                Progress = 0;
+                var path = await FolderPicker.PickAsync(default);
+                await youtubeService.PlaylistDownload(Video.Url,stream.Container, path.Folder.Path, stream.Bitrate, stream.Resolution, progressHandler);
+                var toast = Toast.Make("Track Downloaded", CommunityToolkit.Maui.Core.ToastDuration.Short, 30);
+                toast.Show();
+            }
+            else
+            {
+                IsBusy = true;
+                Progress = 0;
+                var path = await FolderPicker.PickAsync(default);
+                var videos = await youtubeService.VideoDownload(Video.Url, stream.Container, path.Folder.Path, stream.Resolution, stream.Bitrate, progressHandler);
+                var toast = Toast.Make("Track Downloaded", CommunityToolkit.Maui.Core.ToastDuration.Short, 30);
+                toast.Show();
+            }
         }
         catch (Exception ex)
         {
