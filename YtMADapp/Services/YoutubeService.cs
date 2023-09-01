@@ -21,7 +21,7 @@ namespace YtMADapp.Services
             {
                 await foreach (var result in youtube.Search.GetResultsAsync(query))
                 {
-                    if (videoList.Count < 20)
+                    if (videoList.Count < 30)
                     {
                         // Use pattern matching to handle different results (videos, playlists, channels)
                         switch (result)
