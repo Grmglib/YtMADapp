@@ -1,24 +1,25 @@
-﻿using CommunityToolkit.Maui.Storage;
-using YtMADapp.Services;
+﻿using YtMADapp.Services;
 using YtMADapp.View;
 
 namespace YtMADapp.ViewModel
 {
-   
-    public partial class MainPageViewModel:BaseViewModel
+    public partial class MainPageViewModel : BaseViewModel
     {
+        public ObservableCollection<VideoDTO> Videos { get; } = new();
         public string Pesquisa { get; set; }
         public string VideoUrl { get; set; }
 
-        YoutubeService youtubeService;
-        public ObservableCollection<VideoDTO> Videos { get; } = new();
+        private YoutubeService youtubeService;
+
         public MainPageViewModel(YoutubeService youtubeService)
         {
             Title = "Youtube MAD";
             this.youtubeService = youtubeService;
         }
+
+        #region SearchVideo Command
         [RelayCommand]
-        async Task SearchVideoAsync()
+        private async Task SearchVideoAsync()
         {
             if (IsBusy)
                 return;
@@ -26,17 +27,16 @@ namespace YtMADapp.ViewModel
             {
                 IsBusy = true;
                 var videos = await youtubeService.VideoSearch(Pesquisa);
-                if(videos.Count != 0)
+                if (videos.Count != 0)
                 {
                     Videos.Clear();
                 }
-                foreach(var video in videos)
+                foreach (var video in videos)
                 {
                     Videos.Add(video);
                 }
-                
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Debug.Write(ex);
                 await Shell.Current.DisplayAlert("Error", $"Unable to get list:{ex.Message}", "OK");
@@ -45,10 +45,14 @@ namespace YtMADapp.ViewModel
             {
                 IsBusy = false;
             }
-
         }
+
+#endregion
+
+        #region GoToDetails Command
+
         [RelayCommand]
-        async Task GoToDetailsAsync(VideoDTO video)
+        private async Task GoToDetailsAsync(VideoDTO video)
         {
             if (video is null)
                 return;
@@ -59,5 +63,7 @@ namespace YtMADapp.ViewModel
                     {"Video", video}
                 });
         }
+
+        #endregion
     }
 }

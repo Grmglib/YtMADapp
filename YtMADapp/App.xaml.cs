@@ -1,13 +1,11 @@
-﻿using YtMADapp.View;
-
-namespace YtMADapp;
+﻿namespace YtMADapp;
 
 public partial class App : Application
 {
-	public App()
-	{
-		InitializeComponent();
+    public App()
+    {
+        InitializeComponent();
 
-		MainPage = new AppShell();
-	}
+        MainPage = new AppShell();
+    }
 }

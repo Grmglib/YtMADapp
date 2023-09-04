@@ -1,35 +1,28 @@
-﻿using AngleSharp.Dom;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using YoutubeExplode;
+﻿using YoutubeExplode;
 using YoutubeExplode.Common;
 using YoutubeExplode.Search;
-using YoutubeExplode.Videos;
 using YoutubeExplode.Videos.Streams;
-using YtMADapp.Model;
 
 namespace YtMADapp.Services
 {
     public class YoutubeService
     {
         #region Search Video
+
+        //Execute a search on youtube with the provided query, returns 30 first results as a videoDTO list, set by researchResults value.
         public async Task<List<VideoDTO>> VideoSearch(string query)
         {
+            int researchResults = 30;
             var youtube = new YoutubeClient();
             List<VideoDTO> videoList = new List<VideoDTO>();
             try
             {
-                var results = await youtube.Search.GetResultsAsync(query).CollectAsync(30);
+                var results = await youtube.Search.GetResultsAsync(query).CollectAsync(researchResults);
                 foreach (var result in results)
                 {
-                  
-                        // Use pattern matching to handle different results (videos, playlists, channels)
-                        switch (result)
-                        {
+                    // Use pattern matching to handle different results (videos, playlists, channels)
+                    switch (result)
+                    {
                         case VideoSearchResult video:
                             {
                                 Thumbnail thumbnail = null;
@@ -57,35 +50,32 @@ namespace YtMADapp.Services
                                 break;
                             }
                         case PlaylistSearchResult playlist:
+                            {
+                                Thumbnail thumbnail = null;
+                                int area = 0;
+                                var thumbList = playlist.Thumbnails;
+                                foreach (var thumb in thumbList)
                                 {
-                                    Thumbnail thumbnail = null;
-                                    int area = 0;
-                                    var thumbList = playlist.Thumbnails;
-                                    foreach (var thumb in thumbList)
+                                    if (thumb.Resolution.Area > area)
                                     {
-                                        if (thumb.Resolution.Area > area)
-                                        {
-                                            area = thumb.Resolution.Area;
-                                            thumbnail = thumb;
-                                        }
+                                        area = thumb.Resolution.Area;
+                                        thumbnail = thumb;
                                     }
-                                    var videodto = new VideoDTO()
-                                    {
-                                        Title = playlist.Title,
-                                        Id = playlist.Id,
-                                        Author = playlist.Author.ChannelTitle,
-                                        Thumbnail = thumbnail.Url,
-                                        Url = playlist.Url,
-                                        IsPlaylist = true
-                                    };
-                                    videoList.Add(videodto);
-                                    break;
                                 }
+                                var videodto = new VideoDTO()
+                                {
+                                    Title = playlist.Title,
+                                    Id = playlist.Id,
+                                    Author = playlist.Author.ChannelTitle,
+                                    Thumbnail = thumbnail.Url,
+                                    Url = playlist.Url,
+                                    IsPlaylist = true
+                                };
+                                videoList.Add(videodto);
+                                break;
+                            }
                         case ChannelSearchResult channel:
                             {
-                                //var id = channel.Id;
-                                //var title = channel.Title;
-                                //videoList.Add(title);
                                 break;
                             }
                     }
@@ -98,8 +88,11 @@ namespace YtMADapp.Services
             }
         }
 
-        #endregion
+        #endregion Search Video
+
         #region Video Info
+
+        //Retrieves a more detailed videoDTO including all streams available
         public async Task<VideoDTO> VideoInfo(string url)
         {
             List<StreamDTO> streamList = new List<StreamDTO>();
@@ -117,7 +110,6 @@ namespace YtMADapp.Services
                 var videoStreams = manifests.GetVideoOnlyStreams();
                 var mixedStreams = manifests.GetMuxedStreams();
                 var thumbList = video.Thumbnails;
-
 
                 foreach (var thumb in thumbList)
                 {
@@ -152,11 +144,10 @@ namespace YtMADapp.Services
                         Bitrate = stream.Bitrate.ToString(),
                         Url = stream.Url
                     };
-                    if(streamDto.Container != "webm")
+                    if (streamDto.Container != "webm")
                     {
                         streamList.Add(streamDto);
                     }
-                    
                 }
                 foreach (var stream in mixedStreams)
                 {
@@ -190,33 +181,46 @@ namespace YtMADapp.Services
                 throw new Exception(ex.Message);
             }
         }
-        #endregion
 
-        public async Task<List<VideoDTO>> PlaylistInfo(string url,int entries)
+        #endregion Video Info
+
+        #region Playlist Info
+
+        /*Retrieves a more detailed videoDTO including all streams available of the first 10 videos on a playlist, set by researchResults value.
+          This limitation is necessary since retrieving all information of all videos in playlist that can have up to 5000 videos would take too
+          much time*/
+
+        public async Task<List<VideoDTO>> PlaylistInfo(string url)
         {
+            int researchResults = 10;
             List<VideoDTO> videoList = new List<VideoDTO>();
             List<string> UrlList = new List<string>();
             var youtube = new YoutubeClient();
             try
             {
-                var videos = await youtube.Playlists.GetVideosAsync(url).CollectAsync(entries);
-                foreach(var video in videos)
+                var videos = await youtube.Playlists.GetVideosAsync(url).CollectAsync(researchResults);
+                foreach (var video in videos)
                 {
                     UrlList.Add(video.Url);
                 }
-                foreach(var videoUrl in UrlList)
+                foreach (var videoUrl in UrlList)
                 {
-                   videoList.Add(await VideoInfo(videoUrl));
+                    videoList.Add(await VideoInfo(videoUrl));
                 }
                 return videoList;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 throw new Exception(ex.Message);
             }
         }
 
-        public async Task PlaylistDownload(string url, string container, string filePath,string bitrate, double resolution, Progress<double> progress)
+        #endregion Playlist Info
+
+        #region Playlist Download
+
+        //Execute a download of all videos on the provided playlist url by matching stream quality selected and using max quality when there is no match
+        public async Task PlaylistDownload(string url, string container, string filePath, string bitrate, double resolution, Progress<double> progress)
         {
             var youtube = new YoutubeClient();
             try
@@ -226,12 +230,13 @@ namespace YtMADapp.Services
                 {
                     var streamManifest = await youtube.Videos.Streams.GetManifestAsync(video.Url);
                     string fileName = string.Concat(video.Title.Split(Path.GetInvalidFileNameChars()));
-                    if(streamManifest.Streams.Any(f => f.Container.Name == container) & streamManifest.Streams.Any(f => f.Bitrate.ToString() == bitrate) & resolution != 0)
+                    if (streamManifest.Streams.Any(f => f.Container.Name == container) & streamManifest.Streams.Any(f => f.Bitrate.ToString() == bitrate) & resolution != 0)
                     {
                         var streamInfo = streamManifest.GetMuxedStreams().Where(f => f.Bitrate.ToString() == bitrate).First();
                         var stream = await youtube.Videos.Streams.GetAsync(streamInfo);
                         await youtube.Videos.Streams.DownloadAsync(streamInfo, $"{filePath}/{fileName}.{streamInfo.Container}", progress);
-                    }else if(resolution != 0)
+                    }
+                    else if (resolution != 0)
                     {
                         var streamInfo = streamManifest.GetMuxedStreams().TryGetWithHighestVideoQuality();
                         var stream = await youtube.Videos.Streams.GetAsync(streamInfo);
@@ -244,14 +249,18 @@ namespace YtMADapp.Services
                         await youtube.Videos.Streams.DownloadAsync(streamInfo, $"{filePath}/{fileName}.{streamInfo.Container}", progress);
                     }
                 }
-               
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 throw new Exception(ex.Message);
             }
         }
+
+        #endregion Playlist Download
+
         #region Video Download
+
+        //Execute a download a video with the provided url by matching stream quality
         public async Task<string> VideoDownload(string url, string container, string filePath, double? resolution, string? bitrate, Progress<double> progress)
         {
             var youtube = new YoutubeClient();
@@ -260,7 +269,7 @@ namespace YtMADapp.Services
                 var video = await youtube.Videos.GetAsync(url);
                 var streamManifest = await youtube.Videos.Streams.GetManifestAsync(url);
                 string fileName = string.Concat(video.Title.Split(Path.GetInvalidFileNameChars()));
-                if (resolution != null)
+                if (resolution != 0)
                 {
                     var streamInfo = streamManifest.GetVideoStreams().Where(s => s.Container.Name == container).Where(s => s.VideoResolution.Height == resolution).First();
                     await youtube.Videos.Streams.DownloadAsync(streamInfo, $"{filePath}/{fileName}.{streamInfo.Container}", progress);
@@ -276,17 +285,17 @@ namespace YtMADapp.Services
                 {
                     throw new Exception("Quality not selected");
                 }
-
-
             }
             catch (Exception ex)
             {
                 throw new Exception(ex.Message);
             }
-
         }
-        #endregion
+
+        #endregion Video Download
+
         #region Stream Download
+
         public static async Task<Stream> StreamDownload(string url, string container, double? resolution, string? bitrate)
         {
             var youtube = new YoutubeClient();
@@ -314,10 +323,8 @@ namespace YtMADapp.Services
             {
                 throw new Exception(ex.Message);
             }
-
-
-
         }
-        #endregion
+
+        #endregion Stream Download
     }
 }

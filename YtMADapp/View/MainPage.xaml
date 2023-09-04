@@ -10,14 +10,14 @@
     <Grid
       RowSpacing="5">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
-        
-            <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
-        <CollectionView 
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <CollectionView
                     Grid.ColumnSpan="1"
                     Grid.RowSpan="2"
                     Grid.Column="0"
@@ -25,30 +25,29 @@
                     ItemsSource="{Binding Videos}"
                     SelectionMode="Single"
                      ItemsLayout="VerticalGrid, 6">
-            <CollectionView.ItemTemplate> 
-                    <DataTemplate x:DataType="model:VideoDTO">
-                        <Grid Padding="5" Grid.Column="0" Grid.Row="0" RowDefinitions="*,*" ColumnDefinitions="*">
-                            <Frame HeightRequest="200" WidthRequest="200" HorizontalOptions="Start" Style="{StaticResource CardView}">
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="model:VideoDTO">
+                    <Grid Padding="5" Grid.Column="0" Grid.Row="0" RowDefinitions="*,*" ColumnDefinitions="*">
+                        <Frame HeightRequest="200" WidthRequest="200" HorizontalOptions="Start" Style="{StaticResource CardView}">
                             <Frame.GestureRecognizers>
-                                <TapGestureRecognizer Command="{Binding BindingContext.GoToDetailsCommand, Source={x:Reference Page}}" CommandParameter="{Binding .}"/>
+                                <TapGestureRecognizer Command="{Binding BindingContext.GoToDetailsCommand, Source={x:Reference Page}}" CommandParameter="{Binding .}" />
                             </Frame.GestureRecognizers>
                             <Grid Padding="5" ColumnSpacing="0" ColumnDefinitions="*" RowDefinitions="*,*,*,*" BackgroundColor="#36454F">
-                                <Image Source="{Binding Thumbnail}" Aspect="AspectFit"  Grid.Column="0" Grid.Row="0" Grid.RowSpan="2" Grid.ColumnSpan="2" HorizontalOptions="Center"/>
-                                <Label Text="{Binding Title}" LineBreakMode="CharacterWrap" Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="2" HorizontalOptions="Center"/>
-                                <Label Text="{Binding Author}" Grid.Column="0" Grid.Row="3" Grid.ColumnSpan="2" LineBreakMode="CharacterWrap" HorizontalOptions="Center"/>
+                                <Image Source="{Binding Thumbnail}" Aspect="AspectFit"  Grid.Column="0" Grid.Row="0" Grid.RowSpan="2" Grid.ColumnSpan="2" HorizontalOptions="Center" />
+                                <Label Text="{Binding Title}" LineBreakMode="CharacterWrap" Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="2" HorizontalOptions="Center" />
+                                <Label Text="{Binding Author}" Grid.Column="0" Grid.Row="3" Grid.ColumnSpan="2" LineBreakMode="CharacterWrap" HorizontalOptions="Center" />
                             </Grid>
-                            </Frame>
-                        </Grid>
-                    </DataTemplate>
-                </CollectionView.ItemTemplate>
-            </CollectionView>
-        <SearchBar Grid.Row="0" Background="#36454F" Grid.Column="0" Grid.ColumnSpan="2" Margin="8" x:Name="Pesquisa" Text="{Binding Pesquisa}" SearchCommand="{Binding SearchVideoCommand}" Placeholder="Título ou Url do vídeo"></SearchBar>
-            <ActivityIndicator IsVisible="{Binding IsBusy}"
+                        </Frame>
+                    </Grid>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+        <SearchBar Grid.Row="0" Background="#36454F" Grid.Column="0" Grid.ColumnSpan="2" Margin="8" x:Name="Pesquisa" Text="{Binding Pesquisa}" SearchCommand="{Binding SearchVideoCommand}" Placeholder="URL or Title Video"></SearchBar>
+        <ActivityIndicator IsVisible="{Binding IsBusy}"
                        IsRunning="{Binding IsBusy}"
                        HorizontalOptions="FillAndExpand"
                        VerticalOptions="CenterAndExpand"
                        Grid.RowSpan="3"
-                       Grid.ColumnSpan="4"/>
-
-        </Grid>
+                       Grid.ColumnSpan="4" />
+    </Grid>
 </ContentPage>
