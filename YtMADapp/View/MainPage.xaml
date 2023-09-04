@@ -42,7 +42,7 @@
                 </DataTemplate>
             </CollectionView.ItemTemplate>
         </CollectionView>
-        <SearchBar Grid.Row="0" Background="#36454F" Grid.Column="0" Grid.ColumnSpan="2" Margin="8" x:Name="Pesquisa" Text="{Binding Pesquisa}" SearchCommand="{Binding SearchVideoCommand}" Placeholder="URL or Title Video"></SearchBar>
+        <SearchBar Grid.Row="0" Background="#36454F" Grid.Column="0" Grid.ColumnSpan="2" Margin="8" x:Name="Pesquisa" Text="{Binding Pesquisa}" SearchCommand="{Binding SearchVideoCommand}" Placeholder="URL or Video Title"></SearchBar>
         <ActivityIndicator IsVisible="{Binding IsBusy}"
                        IsRunning="{Binding IsBusy}"
                        HorizontalOptions="FillAndExpand"
